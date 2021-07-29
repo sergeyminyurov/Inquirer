@@ -1,0 +1,217 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
+  <Class Name="Inquirer.Data.Question">
+    <Position X="3.75" Y="5.25" Width="1.75" />
+    <Members>
+      <Method Name="ForDatabase" Hidden="true" />
+      <Field Name="MaxCount" Hidden="true" />
+      <Method Name="Question" Hidden="true" />
+    </Members>
+    <AssociationLine Name="Group" Type="Inquirer.Data.QuestionGroup" FixedFromPoint="true">
+      <Path>
+        <Point X="4.062" Y="7.06" />
+        <Point X="4.062" Y="8" />
+      </Path>
+    </AssociationLine>
+    <AssociationLine Name="Answers" Type="Inquirer.Data.QuestionAnswer" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="5.062" Y="7.06" />
+        <Point X="5.062" Y="7.375" />
+        <Point X="7" Y="7.375" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="-0.029" Y="-0.24" Height="0.182" Width="2.202" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AQAAAEAEAAAAAAAAAEAAAAAAAAAEAAAAQAAACACAAAg=</HashCode>
+      <FileName>Data\Question.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Questionnaire" />
+      <Property Name="Group" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="Answers" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Inquirer.Data.QuestionAnswer">
+    <Position X="7" Y="6" Width="1.75" />
+    <Members>
+      <Method Name="ForDatabase" Hidden="true" />
+      <Field Name="MaxCount" Hidden="true" />
+    </Members>
+    <AssociationLine Name="Question" Type="Inquirer.Data.Question" FixedToPoint="true">
+      <Path>
+        <Point X="7" Y="6.146" />
+        <Point X="5.5" Y="6.146" />
+      </Path>
+    </AssociationLine>
+    <AssociationLine Name="SurveyAnswers" Type="Inquirer.Data.SurveyAnswer" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="8.75" Y="7.812" />
+        <Point X="11.25" Y="7.812" />
+        <Point X="11.25" Y="7.425" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.098" Y="0.452" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AQAACAAAAAAAAAgAAEAAAAAAAAAAAAAEAAIACASAAAA=</HashCode>
+      <FileName>Data\QuestionAnswer.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Question" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="SurveyAnswers" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Inquirer.Data.Questionnaire">
+    <Position X="0.5" Y="4" Width="2" />
+    <Members>
+      <Method Name="ForDatabase" Hidden="true" />
+      <Method Name="Questionnaire" Hidden="true" />
+    </Members>
+    <AssociationLine Name="Author" Type="Inquirer.Data.ApplicationUser" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="1.5" Y="4" />
+        <Point X="1.5" Y="3.312" />
+        <Point X="5.5" Y="3.312" />
+      </Path>
+    </AssociationLine>
+    <AssociationLine Name="Groups" Type="Inquirer.Data.QuestionGroup" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="1.438" Y="6.002" />
+        <Point X="1.438" Y="8.312" />
+        <Point X="3.75" Y="8.312" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.102" Y="-0.29" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="Questions" Type="Inquirer.Data.Question" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="2.25" Y="6.002" />
+        <Point X="2.25" Y="6.5" />
+        <Point X="3.75" Y="6.5" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="0.093" Y="-0.273" Height="0.182" Width="1.902" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAEAAAAAgAAgAgAAAAAQAAAEAAAAEABAAABCAAAA=</HashCode>
+      <FileName>Data\Questionnaire.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Author" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="Groups" />
+      <Property Name="Questions" />
+      <Property Name="Surveys" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Inquirer.Data.Survey">
+    <Position X="10.25" Y="3" Width="2" />
+    <Members>
+      <Method Name="ForDatabase" Hidden="true" />
+    </Members>
+    <AssociationLine Name="Questionnaire" Type="Inquirer.Data.Questionnaire" FixedFromPoint="true">
+      <Path>
+        <Point X="10.25" Y="4.182" />
+        <Point X="2.5" Y="4.182" />
+      </Path>
+    </AssociationLine>
+    <AssociationLine Name="Answers" Type="Inquirer.Data.SurveyAnswer" FixedFromPoint="true">
+      <Path>
+        <Point X="11.938" Y="5.002" />
+        <Point X="11.938" Y="6" />
+      </Path>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAEAABAAAAAAACAAAAAAgEEAAAAQAAAAACAAAg=</HashCode>
+      <FileName>Data\Survey.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Questionnaire" />
+      <Property Name="Respondent" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="Answers" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Inquirer.Data.QuestionGroup">
+    <Position X="3.75" Y="8" Width="1.75" />
+    <Members>
+      <Method Name="ForDatabase" Hidden="true" />
+      <Field Name="MaxCount" Hidden="true" />
+    </Members>
+    <AssociationLine Name="Questionnaire" Type="Inquirer.Data.Questionnaire" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="3.75" Y="9.062" />
+        <Point X="0.812" Y="9.062" />
+        <Point X="0.812" Y="6.002" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="-1.032" Y="0.21" Height="0.182" Width="1.422" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="Questions" Type="Inquirer.Data.Question" FixedToPoint="true">
+      <Path>
+        <Point X="4.562" Y="8" />
+        <Point X="4.562" Y="7.06" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.135" Y="0.102" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AQAAAAAAAAAgAAgAAEAAAAQAAAAEAAAEAAAAAACAAAg=</HashCode>
+      <FileName>Data\QuestionGroup.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Questionnaire" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="Questions" />
+    </ShowAsCollectionAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Inquirer.Data.ApplicationUser" Collapsed="true">
+    <Position X="5.5" Y="3" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\ApplicationUser.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Inquirer.Data.SurveyAnswer">
+    <Position X="10.25" Y="6" Width="2" />
+    <Members>
+      <Method Name="ForDatabase" Hidden="true" />
+    </Members>
+    <AssociationLine Name="QuestionAnswer" Type="Inquirer.Data.QuestionAnswer" FixedFromPoint="true">
+      <Path>
+        <Point X="10.25" Y="6.474" />
+        <Point X="8.75" Y="6.474" />
+      </Path>
+    </AssociationLine>
+    <AssociationLine Name="Survey" Type="Inquirer.Data.Survey" FixedToPoint="true">
+      <Path>
+        <Point X="10.562" Y="6" />
+        <Point X="10.562" Y="5.002" />
+      </Path>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAACAQACAAAQ=</HashCode>
+      <FileName>Data\SurveyAnswer.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="QuestionAnswer" />
+      <Property Name="Survey" />
+    </ShowAsAssociation>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

@@ -1,0 +1,133 @@
+﻿@attribute [Route(@Routes.Questionnaire.Form)]
+@attribute [Authorize]
+@inject IDataService DataService
+@inject IUserService UserService
+
+@if (Id == 0)
+{
+    <h1>Новый опросник</h1>
+}
+else
+{
+    <h1>Опросник</h1>
+    @if (Model is not null)
+    {
+        <div>Дата создания: @Model.CreateTime.ToString("dd.MM.yyyy HH:mm")</div>
+    }
+}
+
+<p>
+    <a href="@Routes.Questionnaire.List">Cписок</a>
+</p>
+
+@if (Model is not null && users is not null)
+{
+    @if (!Model.IsNew)
+    {
+        <p class= "btn-group mt-2">
+            <button type="button" class=@GetButtonStyleByMode(EditMode.Form) @onclick="() => { Mode = EditMode.Form; }">Форма</button>
+            <button type="button" class=@GetButtonStyleByMode(EditMode.Groups) @onclick="() => { Mode = EditMode.Groups; }">
+                Группы
+                @if (Model.Groups.Count>0)
+                {
+                    <span class= "badge badge-primary">@Model.Groups.Count</span>
+                }
+            </button>
+            <button type="button" class=@GetButtonStyleByMode(EditMode.Questions) @onclick="() => { Mode = EditMode.Questions; }">
+                Вопросы
+                @if (Model.Questions.Count>0)
+                {
+                    <span class= "badge badge-primary">@Model.Questions.Count</span>
+                }
+            </button>
+        </p>
+    }
+    @if (Mode == EditMode.Form)
+    {
+        <EditForm EditContext="@editContext" OnValidSubmit="@HandleValidSubmit">
+            <div class="card mt-2 mb-3 p-3">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class= "row m-2">
+                    <label class= "col-4">Наименование:</label>
+                    <InputText class="form-control col-8" @bind-Value="Model.Name" DisplayName="Наименование" />
+                </div>
+                <div class="row m-2">
+                    <label class="col-4">Автор:</label>
+                    <InputSelect class="form-control col-8" @bind-Value="Model.AuthorId">
+                        @foreach (var user in users)
+                        {
+                            <option value="@user.Id">@user.UserName</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="row m-2">
+                    <label class="col-4">Баллы для прохождения:</label>
+                    <InputNumber class="form-control col-xl-1 col-2" @bind-Value="Model.Score" DisplayName="Баллы для прохождения" />
+                </div>
+                <div class="row m-2">
+                    <label class="col-4">Описание:</label>
+                    <InputTextArea class="form-control col-8" @bind-Value="Model.Description" />
+                </div>
+            </div>
+            <button class="btn btn-primary" type="submit">Сохранить</button>
+        </EditForm>
+    }
+    else if (Mode == EditMode.Groups)
+    {
+        <QuestionGroupList ParentComponent="this"/>
+    }
+    else if (Mode == EditMode.Questions)
+    {
+        <QuestionList ParentComponent="this"/>
+    }
+}
+
+@code
+{
+    [Parameter]
+    public int Id { get; set; }
+
+    public Questionnaire Model { get; set; }
+    private EditContext editContext { get; set; }
+    private List<ApplicationUser> users { get; set; }
+
+    public enum EditMode { Form, Groups, Questions }
+    private EditMode Mode { get; set; } = EditMode.Form;
+    private string GetButtonStyleByMode(EditMode mode) => Mode == mode ? "btn btn-info" : "btn btn-outline-info";
+
+    private string Message { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await UserService.GetList();
+        if (Id == 0)
+        {
+            Model = new() { AuthorId = users[0].Id };
+        }
+        else
+        {
+            try
+            {
+                Model = await DataService.Get<Questionnaire>(Id);
+            }
+            catch (AccessTokenNotAvailableException exception)
+            {
+                exception.Redirect();
+            }
+        }
+        editContext = new(Model);
+    }
+    private async Task HandleValidSubmit()
+    {
+        if (Model.IsNew)
+        {
+            Model = await DataService.AddNew(Model);
+        }
+        else
+        {
+            await DataService.Update(Model);
+        }
+    }
+    internal void Refresh() => StateHasChanged();
+}

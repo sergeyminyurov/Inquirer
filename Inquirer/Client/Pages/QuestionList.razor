@@ -1,0 +1,126 @@
+﻿@inject IDataService DataService
+
+<div class="table-responsive">
+    <button class="btn btn-link" @onclick="AddNew">Создать</button>
+    @if (SelectedItem is not null)
+    {
+        <span>|</span>
+        <button class="btn btn-link" @onclick="Edit">Редактировать</button>
+        <span>|</span>
+        <button class="btn btn-link" @onclick="(async () => { await DeleteAsync(); })">Удалить</button>
+    }
+    <table class="table table-striped table-hover">
+        <thead class="thead-light">
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Вопрос</th>
+                @if (Model.Groups.Count > 0)
+                {
+                    <th scope="col">Группа</th>
+                }
+                <th scope="col">Ответы</th>
+                <th scope="col">Баллы</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Questions.Count == 0)
+            {
+                <tr>
+                    <td colspan="5">
+                        Нет данных
+                    </td>
+                </tr>
+            }
+            else
+            {
+                foreach (var item in Model.Questions)
+                {
+                    <tr class="@GetSelectedRowStyle(item.Id)" @onclick="(a) => SelectedItem = item">
+                        <th scope="row" rowspan="@item.Answers.Count">@item.Number</th>
+                        <td rowspan="@item.Answers.Count">@item.Text</td>
+                        @if (Model.Groups.Count > 0)
+                        {
+                            <td rowspan="@item.Answers.Count">@GetGroupName(item)</td>
+                        }
+                        <td>
+                            @if (item.Answers.Count > 0)
+                            {
+                                @item.Answers.OrderBy(t => t.Number).First().Text
+                            }
+                        </td>
+                        <td>
+                            @if (item.Answers.Count > 0)
+                            {
+                                @item.Answers.OrderBy(t => t.Number).First().Score
+                            }
+                        </td>
+                    </tr>
+                    @foreach (var ans in item.Answers.OrderBy(t => t.Number).Skip(1))
+                    {
+                        <tr class="@GetSelectedRowStyle(item.Id)">
+                            <td>@ans.Text</td>
+                            <td>@ans.Score</td>
+                        </tr>
+                    }
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (EditedItem is not null)
+{
+    <div class="modal show" tabindex="-1" role="dialog" style="display:block">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Вопрос</h5>
+                </div>
+                <div class="modal-body">
+                    <QuestionForm Questionnaire="Model" Question="EditedItem" />
+                </div>
+                <div class="modal-footer">
+                    <button type="reset" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="() => EditedItem = null">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public QuestionnaireForm ParentComponent { get; set; }
+    public Questionnaire Model => ParentComponent.Model;
+
+    private Question SelectedItem { get; set; }
+    private string GetSelectedRowStyle(int id) => SelectedItem?.Id == id ? "bg-info" : "";
+
+    private Question EditedItem { get; set; }
+
+    private string GetGroupName(Question item) => Model.Groups.FirstOrDefault(t => t.Id == item.GroupId).Name;
+
+    private void AddNew()
+    {
+        EditedItem = new Question
+        {
+            QuestionnaireId = Model.Id,
+            Number = Model.Questions.Count == 0 ? 1 : Model.Questions.Max(t => t.Number) + 1
+        };
+        ParentComponent.Refresh();
+        if (Model.Groups.Count > 0)
+        {
+            EditedItem.GroupId = Model.Groups.OrderBy(t => t.Number).First().Id;
+        }
+    }
+    private void Edit()
+    {
+        EditedItem = SelectedItem;
+    }
+    private async Task DeleteAsync()
+    {
+        await DataService.Delete<Question>(SelectedItem.Id);
+        Model.Questions.Remove(SelectedItem);
+        ParentComponent.Refresh();
+        SelectedItem = null;
+    }
+} 

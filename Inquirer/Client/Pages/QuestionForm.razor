@@ -1,0 +1,158 @@
+﻿@inject IDataService DataService
+
+<EditForm EditContext="@EditContext" OnValidSubmit="@HandleValidSubmitAsync">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="row mb-2 mr-1">
+        <label class="col-4">Текст вопроса:</label>
+        <InputTextArea class="form-control form-control-sm col-8" @bind-Value="Question.Text" DisplayName="Текст вопроса" />
+    </div>
+    @if (Questionnaire.Groups.Count > 0)
+    {
+        <div class="row mb-3 mr-1">
+            <label class="col-4">Группа:</label>
+            <InputSelect class="form-control form-control-sm col-8" @bind-Value="Question.GroupId">
+                @foreach (var group in Questionnaire.Groups)
+                    {
+                    <option value="@group.Id">@group.Name</option>
+                    }
+            </InputSelect>
+        </div>
+    }
+    <button type="submit" class="btn btn-primary">Сохранить вопрос</button>
+</EditForm>
+
+@if (Question.Id != 0)
+{
+    <hr />
+    <h5 class="mt-2">Ответы</h5>
+    <table class="table table-sm table-striped table-hover">
+        <thead class="thead-light">
+            <tr>
+                <th>#</th>
+                <th>Текст</th>
+                <th>Баллы</th>
+                <th>
+                    @if (EditedItem is null)
+                    {
+                        <button class="btn btn-link" @onclick="AddNewAnswer">Создать</button>
+                    }
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Question.Answers.Count == 0)
+            {
+                <tr>
+                    <td colspan="4">
+                        Нет данных
+                    </td>
+                </tr>
+            }
+            else
+            {
+                foreach (var item in Question.Answers)
+                {
+                    <tr>
+                        @if (EditedItem?.Id == item.Id)
+                        {
+                            <th scope="col">@item.Number</th>
+                            <td>
+                                <input type="text" class="form-control" @bind="item.Text" />
+                            </td>
+                            <td>
+                                <input type="number" class="form-control" @bind="item.Score" />
+                            </td>
+                            <td>
+                                <button class="btn btn-link" @onclick="(async () => await SaveAnswerAsync())">Сохранить</button>
+                                <button class="btn btn-link" @onclick="CancelAnswer">Отмена</button>
+                            </td>
+                        }
+                        else
+                        {
+                            <th scope="row">@item.Number</th>
+                            <td>@item.Text</td>
+                            <td>@item.Score</td>
+                            <td>
+                                @if (EditedItem is null)
+                                {
+                                    <button class="btn btn-link" @onclick="() => EditAnswer(item)">Изменить</button>
+                                    <button class="btn btn-link" @onclick="() => DeleteAnswer(item)">Удалить</button>
+                                }
+                            </td>
+                        }
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter]
+    public Questionnaire Questionnaire { get; set; }
+
+    [Parameter]
+    public Question Question { get; set; }
+    private EditContext EditContext { get; set; }
+
+    protected override void OnInitialized()
+    {
+        EditContext = new EditContext(Question);
+    }
+
+    private async Task HandleValidSubmitAsync()
+    {
+        if (Question.IsNew)
+        {
+            var saved = await DataService.AddNew(Question);
+            Question.Id = saved.Id;
+            Questionnaire.Questions.Add(Question);
+        }
+        else
+        {
+            await DataService.Update(Question);
+        }
+    }
+
+    private QuestionAnswer EditedItem { get; set; }
+
+    private void AddNewAnswer()
+    {
+        Question.Answers.Add(EditedItem = new QuestionAnswer
+        {
+            QuestionId = Question.Id,
+            Number = Question.Answers.Count == 0 ? 1 : Question.Answers.Max(t => t.Number) + 1,
+        });
+    }
+    private void EditAnswer(QuestionAnswer item)
+    {
+        EditedItem = item;
+    }
+    private async Task DeleteAnswer(QuestionAnswer item)
+    {
+        await DataService.Delete<QuestionAnswer>(item.Id);
+        Question.Answers.Remove(item);
+    }
+    private async Task SaveAnswerAsync()
+    {
+        if (EditedItem.IsNew)
+        {
+            var savedItem = await DataService.AddNew(EditedItem);
+            EditedItem.Id = savedItem.Id;
+        }
+        else
+        {
+            await DataService.Update(EditedItem);
+        }
+        EditedItem = null;
+    }
+    private void CancelAnswer()
+    {
+        if (EditedItem.Id == 0)
+        {
+            Question.Answers.Remove(EditedItem);
+        }
+        EditedItem = null;
+    }
+} 

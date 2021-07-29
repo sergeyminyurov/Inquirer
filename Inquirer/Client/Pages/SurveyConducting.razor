@@ -1,0 +1,97 @@
+﻿@attribute [Route(Routes.Survey.Conducting)]
+@attribute [Authorize]
+@inject NavigationManager NavigationManager
+@inject IDataService DataService
+@inject ISurveyService SurveyService
+
+@if (Questionnaire is null)
+{
+    <p><em>Создание опроса...</em><span class="spinner-grow" /> </p>
+}
+else if (Questionnaire.Questions.Count == 0)
+{
+    <p class="alert alert-warning">Нет вопросов в опроснике '@Questionnaire.Name'</p>
+}
+else
+{
+    <h1>@Questionnaire.Name</h1>
+    <p>@Questionnaire.Description</p>
+    @if (Survey is not null)
+    {
+        <p>Дата создания: @Survey.CreateTime.ToString("dd.MM.yyyy HH:mm")</p>
+        @if (Survey.CompleteTime is not null)
+        {
+            <p>Дата завершения: @Survey.CompleteTime.Value.ToString("dd.MM.yyyy HH:mm")</p>
+        }
+    }
+    <hr />
+    <p>Пожалуйста, ответьте на следующие вопросы:</p>
+    @foreach (var qst in Questionnaire.Questions)
+    {
+        <h4>@qst.Text</h4>
+        <div class="ml-5 mb-2">
+            @foreach (var ans in qst.Answers)
+            {
+                <div class="form-check">
+                    <input class="form-check-input"
+                           id=@("answer" + ans.Id)
+                           name="@("answer" + (qst.IsSingle() ? qst.Id : ans.Id))"
+                           type=@(qst.IsSingle() ? "radio" : "checkbox")
+                           @onchange="async (a) => { await SetAnswer(qst, ans, a.Value); }" />
+                    <label class="form-check-label" for="@("answer" + ans.Id)">@ans.Text</label>
+                </div>
+            }
+        </div>
+    }
+    <button class="btn-block btn-primary" @onclick="CompleteInterview">Завершение опроса</button>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Questionnaire Questionnaire { get; set; }
+    private Survey Survey { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Questionnaire = await DataService.Get<Questionnaire>(Id);
+            if (Questionnaire.Questions.Count > 0)
+            {
+                Survey = new Survey { QuestionnaireId = Id };
+                Survey = await DataService.AddNew(Survey);
+            }
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+    }
+
+    private async Task SetAnswer(Question question, QuestionAnswer answer, object value)
+    {
+        if (question.IsSingle())
+        {
+            await SurveyService.SetAnswer(Survey, question, answer, single: true);
+        }
+        else
+        {
+            if ((bool)value)
+            {
+                await SurveyService.SetAnswer(Survey, question, answer, single: false);
+            }
+            else
+            {
+                await SurveyService.RemoveAnswer(Survey, answer);
+            }
+        }
+    }
+    private void CompleteInterview()
+    {
+        Survey.CompleteTime = DateTime.Now;
+        DataService.Update(Survey);
+        NavigationManager.NavigateTo(Routes.Survey.List);
+    }
+}

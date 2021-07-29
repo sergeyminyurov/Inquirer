@@ -1,0 +1,81 @@
+﻿@attribute [Route(@Routes.Questionnaire.List)]
+@attribute [Authorize]
+@inject IDataService DataService
+
+<h1>Конструктор опросников</h1>
+
+<div class="table-responsive">
+    <a class="d-inline" href="@Routes.Parameterization(Routes.Questionnaire.Form, 0)">Создать</a>
+    @if (SelectedItem is not null)
+    {
+        <span> | </span>
+        <a class="d-inline" href="@Routes.Parameterization(Routes.Questionnaire.Form, @SelectedItem.Id)">Редактировать</a>
+        <span> |</span>
+        <button class="btn btn-link d-inline" @onclick="(async () => { await DeleteAsync(); })">Удалить</button>
+    }
+    @if (_data is null)
+    {
+        <p><em>Чтение данных...</em><span class="spinner-border text-primary"/> </p>
+    }
+    else
+    {
+        <table class="table table-striped table-hover">
+            <thead class="thead-light">
+                <tr>
+                    <th>Наименование</th>
+                    <th>Автор</th>
+                    <th>Баллы</th>
+                    <th>Описание</th>
+                    <th>Дата создания</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (_data.Count == 0)
+                {
+                    <tr>
+                        <td rowspan="5">Нет данных</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var item in _data)
+                    {
+                        <tr class="@GetSelectedRowStyle(item.Id)" @onclick="(a) => SelectedItem = item">
+                            <td>@item.Name</td>
+                            <td>@item.Author?.UserName</td>
+                            <td>@item.Score</td>
+                            <td>@item.Description</td>
+                            <td>@item.CreateTime.ToString("dd.MM.yyyy HH:mm")</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+    private List<Questionnaire> _data;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _data = await DataService.GetList<Questionnaire>();
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+    }
+
+    private Questionnaire SelectedItem { get; set; }
+    private string GetSelectedRowStyle(int id) => SelectedItem?.Id == id ? "bg-info" : "";
+
+    public async Task DeleteAsync()
+    {
+        await DataService.Delete<Questionnaire>(SelectedItem.Id);
+        _data.Remove(SelectedItem);
+        SelectedItem = null;
+    }
+}

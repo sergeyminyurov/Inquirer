@@ -1,0 +1,47 @@
+﻿@attribute [Route(Routes.Survey.List)]
+@attribute [Authorize]
+@inject IDataService DataService
+
+<h1>Проведение опросов</h1>
+
+@if (_data is null)
+{
+    <p><em>Чтение данных...</em><span class="spinner-grow" /> </p>
+}
+else if (_data.Count == 0)
+{
+    <p class="alert alert-warning">Нет опросников</p>
+}
+else
+{
+    <div class="card-deck">
+        @foreach (var item in _data)
+        {
+            <div class="card thumbnail">
+                <div class="card-body">
+                    <h5 class="card-title">@item.Name</h5>
+                    <p class="card-text">@item.Description</p>
+                </div>
+                <div class="card-footer">
+                    <a href="@Routes.Parameterization(@Routes.Survey.Conducting, @item.Id)">Начать опрос</a>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<Questionnaire> _data;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _data = await DataService.GetList<Questionnaire>();
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+    }
+}
